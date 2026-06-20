@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { Logo } from "@/components/global/logo";
 import { SignupForm } from "@/features/auth/signup-form";
-import Link from "next/link";
 
 const SignUpPage = () => {
   return (
