@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
+import { AxiosError } from "axios";
 
 const formSchema = z.object({
   fname: z
@@ -48,22 +51,26 @@ export const SignupForm = ({
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
-  }
+  const router = useRouter();
+
+  const onSubmit = async (values: {
+    fname: string;
+    lname: string;
+    email: string;
+  }) => {
+    try {
+      await authService.signUp(values);
+      toast.success("Compte initié ! Un code OTP a été envoyé.");
+
+      router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`);
+    } catch (err) {
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message
+          : "Erreur lors de l'inscription.",
+      );
+    }
+  };
 
   const {
     handleSubmit,

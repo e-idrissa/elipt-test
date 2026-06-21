@@ -18,14 +18,15 @@ import {
   Field,
   FieldError,
   FieldGroup,
-  FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { AxiosError } from "axios";
+import { authService } from "@/services/auth.service";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
-  email: z.email(),
-  otp: z.string().min(4, "OTP is required."),
+  token: z.string().min(4, "OTP token is required."),
 });
 
 export const VerifyOTPForm = ({
@@ -35,27 +36,28 @@ export const VerifyOTPForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      otp: "",
+      token: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
-  }
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || ""; // Récupère l'email de l'étape précédente
+
+  const onSubmit = async (values: { token: string }) => {
+    try {
+      await authService.verifyOtp({ email, token: values.token });
+      toast.success("Code vérifié avec succès !");
+
+      router.push(`/config-account?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message
+          : "Code OTP invalide ou expiré.",
+      );
+    }
+  };
 
   const {
     handleSubmit,
@@ -69,40 +71,22 @@ export const VerifyOTPForm = ({
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Verify your account</CardTitle>
-            <CardDescription>Enter the OTP code sent to your email.</CardDescription>
+            <CardDescription>
+              Enter the OTP code sent to your email.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
               <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="hidden">
-                    <FieldLabel htmlFor="verification-form-email">Email</FieldLabel>
-                    <Input
-                      {...field}
-                      id="verification-form-email"
-                      aria-invalid={fieldState.invalid}
-                      type="email"
-                      placeholder="eddy@gmail.com"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="otp"
+                name="token"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <Input
                       {...field}
-                      id="verification-form-otp"
+                      id="verification-form-token"
                       aria-invalid={fieldState.invalid}
-                      type="password"
+                      type="text"
                       placeholder="••••••••"
                       autoComplete="off"
                     />
@@ -118,7 +102,7 @@ export const VerifyOTPForm = ({
             <Field orientation="horizontal">
               <Button
                 type="submit"
-                form="sign-in-form"
+                form="verification-form"
                 className="w-full"
                 disabled={isSubmitting || !isValid}
               >

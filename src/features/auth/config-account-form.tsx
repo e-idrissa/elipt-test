@@ -21,12 +21,15 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import Image from "next/image";
+import { api } from "@/lib/axios";
+import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AxiosError } from "axios";
 
 const formSchema = z.object({
-  token: z.string().min(4, "Token is required."),
-  email: z.email(),
   avatar: z.string().min(4, "Image is required."),
   password: z.string().min(4, "Password must be at least 4 characters."),
   confirmedPassword: z
@@ -38,39 +41,75 @@ export const ConfigAccountForm = () => {
   const [avatarImg, setAvatarImg] = useState<string>(
     "/images/sample-product.jpg",
   );
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      token: "",
-      email: "",
       avatar: "",
       password: "",
+      confirmedPassword: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      await authService.configAccount({ email, password: data.password, imageCover: data.avatar });
+      toast.success("Account configured successfully.");
+
+      router.push(`/config-account?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      // console.log(err.response.data.message)
+      toast.error(
+        err instanceof AxiosError ? err.response?.data?.message : "Failed to configure your account."
+      );
+    }
   }
 
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { isValid, isSubmitting },
   } = form;
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    const localUrl = URL.createObjectURL(file);
+    setAvatarImg(localUrl);
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("/AppUsers/UploadImage", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const serverImageUrl = response.data.secureUrl || response.data.Url;
+
+      setValue("avatar", serverImageUrl, { shouldValidate: true });
+
+      console.log(response.data);
+
+      toast.success("Image téléversée avec succès !");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur lors de l'upload de l'image.");
+      setAvatarImg(avatarImg);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <form id="config-account-form" onSubmit={handleSubmit(onSubmit)}>
@@ -86,32 +125,39 @@ export const ConfigAccountForm = () => {
             <Controller
               name="avatar"
               control={control}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <Field
                   data-invalid={fieldState.invalid}
                   className="w-[45%] aspect-square relative"
                 >
-                  <FieldLabel htmlFor="config-account-form-avatar">
-                    <div className=" size-full overflow-hidden rounded-lg">
-                      <Image
-                        src={avatarImg}
-                        loading="eager"
-                        alt="productImage"
-                        height={150}
-                        width={180}
-                        className="aspect-square w-full object-cover"
-                      />
-                    </div>
-                  </FieldLabel>
-                  <div className="w-10">
-                    <Input
-                      {...field}
-                      id="config-account-form-avatar"
-                      aria-invalid={fieldState.invalid}
-                      type="file"
-                      className="absolute top-4 left-4 w-10 hidden"
+                  <FieldLabel
+                    htmlFor="config-account-form-avatar"
+                    className="cursor-pointer group relative block size-full rounded-lg overflow-hidden border border-dashed border-muted-foreground/50 hover:border-primary transition"
+                  >
+                    <Image
+                      src={avatarImg}
+                      loading="eager"
+                      alt="Aperçu du produit"
+                      fill
+                      className={cn(
+                        "object-cover transition-opacity",
+                        isUploading ? "opacity-40" : "group-hover:opacity-80",
+                      )}
                     />
-                  </div>
+                    {isUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Spinner />
+                      </div>
+                    )}
+                  </FieldLabel>
+                  <Input
+                    id="config-account-form-avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={isUploading || isSubmitting}
+                    className="hidden"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -170,7 +216,7 @@ export const ConfigAccountForm = () => {
           <Field orientation="horizontal">
             <Button
               type="submit"
-              form="sign-up-form"
+              form="config-account-form"
               className="w-full"
               disabled={isSubmitting || !isValid}
             >

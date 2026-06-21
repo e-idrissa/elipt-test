@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 export const api = axios.create({
-  baseURL: process.env.BASE_URL,
+  baseURL: "https://elipt.elieruvinga.online",
   headers: {
     "Content-Type": "application/json",
   },

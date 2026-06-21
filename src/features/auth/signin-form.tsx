@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { authService } from "@/services/auth.service";
+import { AxiosError } from "axios";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.email(),
@@ -43,22 +47,34 @@ export const SigninForm = ({
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
-  }
+  const router = useRouter();
+
+  const onSubmit = async (values: { email: string; password: string }) => {
+    try {
+      const data = await authService.signIn(values);
+
+      const token = data.token || data.accessToken;
+
+      if (token) {
+        Cookies.set("auth_token", token, {
+          expires: 7,
+          secure: true,
+          sameSite: "strict",
+        });
+        toast.success("Ravi de vous revoir !");
+
+        router.push("/dashboard");
+      } else {
+        throw new Error("Token manquant dans la réponse du serveur.");
+      }
+    } catch (err) {
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message
+          : "Identifiants incorrects.",
+      );
+    }
+  };
 
   const {
     handleSubmit,
@@ -72,9 +88,7 @@ export const SigninForm = ({
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Sign In</CardTitle>
-            <CardDescription>
-              Enter your email below to signin
-            </CardDescription>
+            <CardDescription>Enter your email below to signin</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
@@ -103,7 +117,9 @@ export const SigninForm = ({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="sign-in-form-password">Password</FieldLabel>
+                    <FieldLabel htmlFor="sign-in-form-password">
+                      Password
+                    </FieldLabel>
                     <Input
                       {...field}
                       id="sign-in-form-password"
