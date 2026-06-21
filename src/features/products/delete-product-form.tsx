@@ -15,10 +15,8 @@ import { cn } from "@/lib/utils";
 export const DeleteProductForm = () => {
   return (
     <Drawer direction="right">
-      <DrawerTrigger>
-        <Button variant="destructive">
-          <Trash2Icon />
-        </Button>
+      <DrawerTrigger className={cn(buttonVariants({ variant: "destructive" }))}>
+        <Trash2Icon />
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>

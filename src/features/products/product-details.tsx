@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 export const ProductDetails = () => {
   return (
     <Drawer direction="right">
-      <DrawerTrigger>
-        <Button>Details</Button>
+      <DrawerTrigger className={cn("flex-1", buttonVariants({ variant: "default" }))}>
+        Details
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>

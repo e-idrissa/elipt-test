@@ -15,10 +15,8 @@ import { cn } from "@/lib/utils";
 export const EditProductForm = () => {
   return (
     <Drawer direction="right">
-      <DrawerTrigger>
-        <Button variant="outline">
-          <PenIcon />
-        </Button>
+      <DrawerTrigger className={cn(buttonVariants({ variant: "outline" }))}>
+        <PenIcon />
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
