@@ -56,19 +56,25 @@ export const ConfigAccountForm = () => {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await authService.configAccount({ email, password: data.password, imageCover: data.avatar });
+      await authService.configAccount({
+        email,
+        password: data.password,
+        imageCover: data.avatar,
+      });
       toast.success("Account configured successfully.");
 
       router.push(`/config-account?email=${encodeURIComponent(email)}`);
     } catch (err) {
       // console.log(err.response.data.message)
       toast.error(
-        err instanceof AxiosError ? err.response?.data?.message : "Failed to configure your account."
+        err instanceof AxiosError
+          ? err.response?.data?.message
+          : "Failed to configure your account.",
       );
     }
-  }
+  };
 
   const {
     handleSubmit,

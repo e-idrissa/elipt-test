@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import Image from "next/image";
 import {
   InputGroup,
@@ -29,6 +29,8 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { DollarSignIcon } from "lucide-react";
+import { api } from "@/lib/axios";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   title: z
@@ -47,6 +49,7 @@ export const NewProductForm = () => {
   const [productImg, setProductImg] = useState<string>(
     "/images/sample-product.jpg",
   );
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,8 +81,41 @@ export const NewProductForm = () => {
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { isValid, isSubmitting },
   } = form;
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    const localUrl = URL.createObjectURL(file);
+    setProductImg(localUrl);
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("/AppUsers/UploadImage", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const serverImageUrl = response.data.secure_url || response.data.url;
+
+      setValue("image", serverImageUrl, { shouldValidate: true });
+
+      toast.success("Image téléversée avec succès !");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur lors de l'upload de l'image.");
+      setProductImg(productImg);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <form id="new-product-form" onSubmit={handleSubmit(onSubmit)}>
@@ -100,18 +136,42 @@ export const NewProductForm = () => {
                   data-invalid={fieldState.invalid}
                   className="w-[38%] aspect-square relative"
                 >
-                  <FieldLabel htmlFor="new-product-form-image">
-                    <div className=" size-full overflow-hidden rounded-lg">
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="w-[38%] aspect-square relative"
+                  >
+                    <FieldLabel
+                      htmlFor="new-product-form-image"
+                      className="cursor-pointer group relative block size-full rounded-lg overflow-hidden border border-dashed border-muted-foreground/50 hover:border-primary transition"
+                    >
                       <Image
                         src={productImg}
                         loading="eager"
-                        alt="productImage"
-                        height={150}
-                        width={180}
-                        className="aspect-square w-full object-cover"
+                        alt="Aperçu du produit"
+                        fill
+                        className={cn(
+                          "object-cover transition-opacity",
+                          isUploading ? "opacity-40" : "group-hover:opacity-80",
+                        )}
                       />
-                    </div>
-                  </FieldLabel>
+                      {isUploading && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Spinner />
+                        </div>
+                      )}
+                    </FieldLabel>
+                    <Input
+                      id="new-product-form-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={isUploading || isSubmitting}
+                      className="hidden"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                   <div className="w-10">
                     <Input
                       {...field}
@@ -207,7 +267,7 @@ export const NewProductForm = () => {
               <Field orientation="horizontal">
                 <Button
                   type="submit"
-                  form="sign-up-form"
+                  form="new-product-form"
                   className="w-full"
                   disabled={isSubmitting || !isValid}
                 >
