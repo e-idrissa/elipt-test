@@ -50,6 +50,7 @@ const UserButton = () => {
         <Avatar>
           <AvatarImage
             src="https://github.com/shadcn.png"
+            loading="eager"
             alt="@shadcn"
             className="grayscale"
           />
@@ -68,6 +69,7 @@ const UserButton = () => {
               <Avatar>
                 <AvatarImage
                   src="https://github.com/shadcn.png"
+                  loading="eager"
                   alt="@shadcn"
                   className="grayscale"
                 />

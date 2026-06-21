@@ -22,11 +22,11 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 import Image from "next/image";
-import { Textarea } from "@/components/ui/textarea";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
+  InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { DollarSignIcon } from "lucide-react";
 
@@ -96,11 +96,15 @@ export const NewProductForm = () => {
               name="image"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="w-[47%] aspect-square relative">
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="w-[38%] aspect-square relative"
+                >
                   <FieldLabel htmlFor="new-product-form-image">
                     <div className=" size-full overflow-hidden rounded-lg">
                       <Image
                         src={productImg}
+                        loading="eager"
                         alt="productImage"
                         height={150}
                         width={180}
@@ -124,28 +128,57 @@ export const NewProductForm = () => {
               )}
             />
             <div className="space-y-4 flex-1">
-              <Controller
-                name="title"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="new-product-form-title">
-                      Title
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="new-product-form-title"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Sneakers"
-                      type="text"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+              <div className="flex items-center gap-4">
+                <Controller
+                  name="title"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="flex-1">
+                      <FieldLabel htmlFor="new-product-form-title">
+                        Title
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="new-product-form-title"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Sneakers"
+                        type="text"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="w-1/3">
+                      <FieldLabel htmlFor="new-product-form-price">
+                        Price
+                      </FieldLabel>
+                      <InputGroup>
+                        <InputGroupAddon>
+                          <DollarSignIcon />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          {...field}
+                          id="new-product-form-price"
+                          aria-invalid={fieldState.invalid}
+                          placeholder="Sneakers"
+                          type="number"
+                          autoComplete="off"
+                        />
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
               <Controller
                 name="description"
                 control={control}
@@ -154,38 +187,14 @@ export const NewProductForm = () => {
                     <FieldLabel htmlFor="new-product-form-description">
                       Description
                     </FieldLabel>
-                    <Textarea
-                      {...field}
-                      id="new-product-form-description"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Product description..."
-                      rows={4}
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="price"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="new-product-form-price">
-                      Price
-                    </FieldLabel>
                     <InputGroup>
-                      <InputGroupAddon>
-                        <DollarSignIcon />
-                      </InputGroupAddon>
-                      <InputGroupInput
+                      <InputGroupTextarea
                         {...field}
-                        id="new-product-form-price"
+                        id="new-product-form-description"
                         aria-invalid={fieldState.invalid}
-                        placeholder="Sneakers"
-                        type="number"
+                        placeholder="Product description..."
+                        className="min-h-[80px]"
+                        rows={4}
                         autoComplete="off"
                       />
                     </InputGroup>

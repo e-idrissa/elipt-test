@@ -9,7 +9,7 @@ const data = [
     title: "Nike Shoes",
     description:
       "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
+    image: "/images/shoe.jpg",
     price: 30,
   },
   {
@@ -64,7 +64,7 @@ const DashboardPage = () => {
           <NewProductForm />
         </div>
         <div className="space-y-10 col-span-2">
-          <div className="rounded-md p-2 px-3 flex items-center gap-2 bg-primary text-sm text-white w-fit">
+          <div className="rounded-md p-2 px-3 flex items-center gap-2 bg-primary text-xs text-white w-fit">
             <CalendarRangeIcon className="size-4" />
             <p>{date.toDateString()}</p>
           </div>
@@ -73,6 +73,9 @@ const DashboardPage = () => {
             <p className="text-muted-foreground">
               Good to see you again. Get started by adding another product for
               your customers
+            </p>
+            <p className="text-muted-foreground">
+              You are doing a good job so far
             </p>
           </div>
           <InsightCards />

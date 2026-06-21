@@ -9,7 +9,6 @@ import {
 import { ProductDetails } from "./product-details";
 import { EditProductForm } from "./edit-product-form";
 import { DeleteProductForm } from "./delete-product-form";
-
 interface Props {
   id: string;
   image: string;
@@ -31,6 +30,7 @@ export const ProductCard = ({
         <div className="size-full overflow-hidden rounded-lg">
           <Image
             src={image}
+            loading="eager"
             alt="productImage"
             height={150}
             width={180}
@@ -39,14 +39,29 @@ export const ProductCard = ({
         </div>
         <div className="w-full flex items-center justify-between pt-2">
           <CardTitle>{title}</CardTitle>
-          <p>{price}</p>
+          <div className="rounded-md px-2 py-1 bg-emerald-700/20 text-emerald-700 font-medium">
+            $ {price}
+          </div>
         </div>
-        <CardDescription className="line-clamp-2">{description}</CardDescription>
+        <CardDescription className="line-clamp-2">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardFooter className="flex items-center gap-2">
-        <ProductDetails />
-        <EditProductForm />
-        <DeleteProductForm />
+        <ProductDetails
+          title={title}
+          description={description}
+          image={image}
+          price={price}
+        />
+        <EditProductForm
+          id={id}
+          title={title}
+          description={description}
+          image={image}
+          price={price}
+        />
+        <DeleteProductForm id={id} />
       </CardFooter>
     </Card>
   );

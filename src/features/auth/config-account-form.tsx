@@ -95,6 +95,7 @@ export const ConfigAccountForm = () => {
                     <div className=" size-full overflow-hidden rounded-lg">
                       <Image
                         src={avatarImg}
+                        loading="eager"
                         alt="productImage"
                         height={150}
                         width={180}
