@@ -1,9 +1,17 @@
-import React from 'react'
+import { Logo } from '@/components/global/logo'
+import { ConfigAccountForm } from '@/features/auth/config-account-form'
 
-const VerifyAccountPage = () => {
+const ConfigAccountPage = () => {
   return (
-    <div>VerifyAccountPage</div>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="flex items-center justify-center">
+          <Logo />
+        </div>
+        <ConfigAccountForm />
+      </div>
+    </div>
   )
 }
 
-export default VerifyAccountPage
+export default ConfigAccountPage

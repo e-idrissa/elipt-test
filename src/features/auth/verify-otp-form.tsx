@@ -81,7 +81,7 @@ export const VerifyOTPForm = ({
                     <FieldLabel htmlFor="verification-form-email">Email</FieldLabel>
                     <Input
                       {...field}
-                      id="sign-in-form-email"
+                      id="verification-form-email"
                       aria-invalid={fieldState.invalid}
                       type="email"
                       placeholder="eddy@gmail.com"
@@ -100,7 +100,7 @@ export const VerifyOTPForm = ({
                   <Field data-invalid={fieldState.invalid}>
                     <Input
                       {...field}
-                      id="sign-in-form-password"
+                      id="verification-form-otp"
                       aria-invalid={fieldState.invalid}
                       type="password"
                       placeholder="••••••••"

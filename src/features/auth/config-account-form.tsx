@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -22,39 +23,29 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 import Image from "next/image";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { DollarSignIcon } from "lucide-react";
 
 const formSchema = z.object({
-  title: z
+  token: z.string().min(4, "Token is required."),
+  email: z.email(),
+  avatar: z.string().min(4, "Image is required."),
+  password: z.string().min(4, "Password must be at least 4 characters."),
+  confirmedPassword: z
     .string()
-    .min(4, "Password must be at least 4 characters.")
-    .max(32, "Password must be at most 32 characters."),
-  description: z
-    .string()
-    .min(4, "Password must be at least 4 characters.")
-    .max(200, "Password must be at most 200 characters."),
-  image: z.string().min(4, "Image is required."),
-  price: z.number(),
+    .min(4, "Confirmed Password must be at least 4 characters."),
 });
 
-export const NewProductForm = () => {
-  const [productImg, setProductImg] = useState<string>(
+export const ConfigAccountForm = () => {
+  const [avatarImg, setAvatarImg] = useState<string>(
     "/images/sample-product.jpg",
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      image: "",
-      price: 0,
+      token: "",
+      email: "",
+      avatar: "",
+      password: "",
     },
   });
 
@@ -82,25 +73,28 @@ export const NewProductForm = () => {
   } = form;
 
   return (
-    <form id="new-product-form" onSubmit={handleSubmit(onSubmit)}>
+    <form id="config-account-form" onSubmit={handleSubmit(onSubmit)}>
       <Card className="">
         <CardHeader className="px-6">
-          <CardTitle>Create a new Product</CardTitle>
+          <CardTitle>Update account</CardTitle>
           <CardDescription>
-            Fill in all fields to create a new product
+            Fill in all fields to update your account.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6">
           <FieldGroup className="flex flex-row items-center gap-6">
             <Controller
-              name="image"
+              name="avatar"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="w-[47%] aspect-square relative">
-                  <FieldLabel htmlFor="new-product-form-image">
+                <Field
+                  data-invalid={fieldState.invalid}
+                  className="w-[45%] aspect-square relative"
+                >
+                  <FieldLabel htmlFor="config-account-form-avatar">
                     <div className=" size-full overflow-hidden rounded-lg">
                       <Image
-                        src={productImg}
+                        src={avatarImg}
                         alt="productImage"
                         height={150}
                         width={180}
@@ -111,7 +105,7 @@ export const NewProductForm = () => {
                   <div className="w-10">
                     <Input
                       {...field}
-                      id="new-product-form-image"
+                      id="config-account-form-avatar"
                       aria-invalid={fieldState.invalid}
                       type="file"
                       className="absolute top-4 left-4 w-10 hidden"
@@ -125,19 +119,19 @@ export const NewProductForm = () => {
             />
             <div className="space-y-4 flex-1">
               <Controller
-                name="title"
+                name="password"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="new-product-form-title">
-                      Title
+                    <FieldLabel htmlFor="config-account-form-password">
+                      Password
                     </FieldLabel>
                     <Input
                       {...field}
-                      id="new-product-form-title"
+                      id="config-account-form-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder="Sneakers"
-                      type="text"
+                      type="password"
+                      placeholder="••••••••"
                       autoComplete="off"
                     />
                     {fieldState.invalid && (
@@ -147,19 +141,19 @@ export const NewProductForm = () => {
                 )}
               />
               <Controller
-                name="description"
+                name="confirmedPassword"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="new-product-form-description">
-                      Description
+                    <FieldLabel htmlFor="config-account-form-confirmedPassword">
+                      Confirm Password
                     </FieldLabel>
-                    <Textarea
+                    <Input
                       {...field}
-                      id="new-product-form-description"
+                      id="config-account-form-confirmedPassword"
                       aria-invalid={fieldState.invalid}
-                      placeholder="Product description..."
-                      rows={4}
+                      type="password"
+                      placeholder="••••••••"
                       autoComplete="off"
                     />
                     {fieldState.invalid && (
@@ -168,53 +162,28 @@ export const NewProductForm = () => {
                   </Field>
                 )}
               />
-              <Controller
-                name="price"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="new-product-form-price">
-                      Price
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <DollarSignIcon />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        {...field}
-                        id="new-product-form-price"
-                        aria-invalid={fieldState.invalid}
-                        placeholder="Sneakers"
-                        type="number"
-                        autoComplete="off"
-                      />
-                    </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Field orientation="horizontal">
-                <Button
-                  type="submit"
-                  form="sign-up-form"
-                  className="w-full"
-                  disabled={isSubmitting || !isValid}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner />
-                      Creating...
-                    </>
-                  ) : (
-                    <>Create</>
-                  )}
-                </Button>
-              </Field>
             </div>
           </FieldGroup>
         </CardContent>
+        <CardFooter>
+          <Field orientation="horizontal">
+            <Button
+              type="submit"
+              form="sign-up-form"
+              className="w-full"
+              disabled={isSubmitting || !isValid}
+            >
+              {isSubmitting ? (
+                <>
+                  <Spinner />
+                  Updating...
+                </>
+              ) : (
+                <>Update</>
+              )}
+            </Button>
+          </Field>
+        </CardFooter>
       </Card>
     </form>
   );
