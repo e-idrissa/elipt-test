@@ -23,8 +23,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/auth.service";
 import { AxiosError } from "axios";
+import { api } from "@/lib/axios";
 
 const formSchema = z.object({
   fname: z
@@ -53,21 +53,19 @@ export const SignupForm = ({
 
   const router = useRouter();
 
-  const onSubmit = async (values: {
-    fname: string;
-    lname: string;
-    email: string;
-  }) => {
-    try {
-      await authService.signUp(values);
-      toast.success("Compte initié ! Un code OTP a été envoyé.");
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const dest = `/verify-otp?email=${encodeURIComponent(values.email)}`;
 
-      router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`);
+    try {
+      await api.post("/auth/sign-up", values);
+
+      toast.success("Success. Check for the OTP in your inbox.");
+      router.push(dest);
     } catch (err) {
       toast.error(
         err instanceof AxiosError
           ? err.response?.data?.message
-          : "Erreur lors de l'inscription.",
+          : "Failed to initialize account",
       );
     }
   };

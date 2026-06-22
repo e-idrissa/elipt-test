@@ -18,11 +18,11 @@ import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
-import { authService } from "@/services/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
+import { api } from "@/lib/axios";
 
 const formSchema = z.object({
-  token: z.string().min(4, "OTP token is required."),
+  token: z.string().min(1, "OTP token is required."),
 });
 
 export const VerifyOTPForm = ({
@@ -38,19 +38,23 @@ export const VerifyOTPForm = ({
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || ""; // Récupère l'email de l'étape précédente
+  const email = searchParams.get("email") || "";
 
-  const onSubmit = async (values: { token: string }) => {
+  console.log(email);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const dest = `/config-account?email=${encodeURIComponent(email)}&token=${encodeURIComponent(values.token)}`;
+
     try {
-      await authService.verifyOtp({ email, token: values.token });
-      toast.success("Code vérifié avec succès !");
+      const params = { email, token: values.token }
+      
+      await api.post("/auth/verify-otp", params);
 
-      router.push(`/config-account?email=${encodeURIComponent(email)}`);
+      toast.success("Successfully Verified");
+      router.push(dest);
     } catch (err) {
       toast.error(
-        err instanceof AxiosError
-          ? err.response?.data?.message
-          : "Code OTP invalide ou expiré.",
+        err instanceof AxiosError ? err.response?.data?.message : "Invalid OTP",
       );
     }
   };
@@ -100,7 +104,7 @@ export const VerifyOTPForm = ({
                 type="submit"
                 form="verification-form"
                 className="w-full"
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting || isValid}
               >
                 {isSubmitting ? (
                   <>

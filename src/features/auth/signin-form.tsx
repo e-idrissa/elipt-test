@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { authService } from "@/services/auth.service";
 import { AxiosError } from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/axios";
 
 const formSchema = z.object({
   email: z.email(),
@@ -49,29 +49,33 @@ export const SigninForm = ({
 
   const router = useRouter();
 
-  const onSubmit = async (values: { email: string; password: string }) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const dest = "/dashboard";
+
     try {
-      const data = await authService.signIn(values);
+      const response = await api.post("/auth/sign-in", values);
 
-      const token = data.token || data.accessToken;
+      const token = response.data?.Token || response.data?.accessToken;
 
-      if (token) {
-        Cookies.set("auth_token", token, {
-          expires: 7,
-          secure: true,
-          sameSite: "strict",
-        });
-        toast.success("Ravi de vous revoir !");
-
-        router.push("/dashboard");
-      } else {
-        throw new Error("Token manquant dans la réponse du serveur.");
+      if (!token) {
+        throw new Error("Missing token");
       }
+
+      Cookies.set("auth_token", token, {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      });
+
+      toast.success("Welcome back");
+      router.push(dest);
+      router.refresh();
     } catch (err) {
+      console.error(err);
       toast.error(
         err instanceof AxiosError
-          ? err.response?.data?.message
-          : "Identifiants incorrects.",
+          ? err.response?.data?.message || err.response?.data?.message
+          : "An unexpected error occurred",
       );
     }
   };

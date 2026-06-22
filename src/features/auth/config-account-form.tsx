@@ -46,6 +46,7 @@ export const ConfigAccountForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const token = searchParams.get("token") || "";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,18 +57,17 @@ export const ConfigAccountForm = () => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      await authService.configAccount({
-        email,
-        password: data.password,
-        imageCover: data.avatar,
-      });
-      toast.success("Account configured successfully.");
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const dest = "/dashboard";
 
-      router.push(`/config-account?email=${encodeURIComponent(email)}`);
+    try {
+      const params = { avatar: values.avatar, password: values.password, email, token };
+
+      await api.put("/auth/config-account", params);
+
+      toast.success("Successfully configured.")
+      router.push(dest)
     } catch (err) {
-      // console.log(err.response.data.message)
       toast.error(
         err instanceof AxiosError
           ? err.response?.data?.message
@@ -97,7 +97,7 @@ export const ConfigAccountForm = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await api.post("/AppUsers/UploadImage", formData, {
+      const response = await api.post("/auth/avatar-upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
