@@ -28,20 +28,23 @@ interface Props {
 
 export const DeleteUserButton = ({ userId }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async (userId: string) => {
     if (!userId) {
-      toast.error("Impossible de récupérer votre identifiant utilisateur.");
+      toast.error("Missing identifier.");
       return;
     }
 
     setIsDeleting(true);
     try {
-      await api.delete(`/AppUsers/Delete/${userId}`);
+      await api.delete(`/auth/users/${userId}`);
 
       toast.success("Deleted Successfully.");
 
       Cookies.remove("auth_token");
+
+      setIsOpen(false)
 
       window.location.href = "/signup";
     } catch (err) {
@@ -54,43 +57,12 @@ export const DeleteUserButton = ({ userId }: Props) => {
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger>
-        <DropdownMenuItem
-          onSelect={(e) => e.preventDefault()}
-          className="w-full text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-        >
-          <Trash2Icon className="mr-2 h-4 w-4" />
-          <span>Delete account</span>
-        </DropdownMenuItem>
-      </AlertDialogTrigger>
-
-      <AlertDialogContent>
-        <AlertDialogHeader>
-        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDeleteAccount}
-            disabled={isDeleting}
-            className={cn(buttonVariants({ variant: "destructive"}))}
-          >
-            {isDeleting ? (
-              <>
-                <Spinner className="mr-2 h-4 w-4" />
-                Deleting...
-              </>
-            ) : (
-              "delete"
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <DropdownMenuItem
+      onClick={() => handleDeleteAccount(userId)}
+      className={cn(buttonVariants({ variant: "destructive"}), "bg-transparent")}
+    >
+      <Trash2Icon className="mr-2 h-4 w-4" />
+      <span>Delete account</span>
+    </DropdownMenuItem>
   );
 };

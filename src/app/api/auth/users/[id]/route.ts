@@ -5,10 +5,10 @@ const VPS_URL = "https://elipt.elieruvinga.online";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const response = await axios.delete(`${VPS_URL}/AppUsers/Delete/${id}`, {
       headers: { "Content-Type": "application/json" },

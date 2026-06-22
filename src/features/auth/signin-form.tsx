@@ -56,6 +56,7 @@ export const SigninForm = ({
       const response = await api.post("/auth/sign-in", values);
 
       const token = response.data?.Token || response.data?.accessToken;
+      const user = response.data?.DataUser;
 
       if (!token) {
         throw new Error("Missing token");
@@ -66,6 +67,31 @@ export const SigninForm = ({
         secure: true,
         sameSite: "strict",
       });
+      Cookies.set("user_id", user._id, {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      });
+      Cookies.set("user_fname", user.fname, {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      });
+      Cookies.set("user_lname", user.lname, {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      });
+      Cookies.set("user_avatar", user.cover || "", {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      });
+      Cookies.set("user_email", user.email || "", {
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+      })
 
       toast.success("Welcome back");
       router.push(dest);

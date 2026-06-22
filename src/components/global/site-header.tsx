@@ -17,6 +17,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignOutButton } from "@/features/auth/signout-button";
+import { DeleteUserButton } from "@/features/auth/delete-account";
+
+interface Props {
+  email: string | undefined;
+  fname: string | undefined;
+  lname: string | undefined;
+  avatar: string | undefined;
+  userId: string | undefined;
+}
 
 const ProductsDropdown = () => {
   return (
@@ -43,18 +52,21 @@ const ProductsDropdown = () => {
   );
 };
 
-const UserButton = () => {
+const UserButton = ({ email, lname, fname, avatar, userId }: Props) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Avatar>
           <AvatarImage
-            src="https://github.com/shadcn.png"
+            src={avatar}
             loading="eager"
             alt="@shadcn"
             className="grayscale"
           />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarFallback>
+            {lname![0]}
+            {fname![0]}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -68,17 +80,22 @@ const UserButton = () => {
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  src={avatar}
                   loading="eager"
                   alt="@shadcn"
                   className="grayscale"
                 />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarFallback>
+                  {lname![0]}
+                  {fname![0]}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Eddy Hemedy</span>
+                <span className="truncate font-medium">
+                  {lname} {fname}
+                </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  eddy@gmail.com
+                  {email}
                 </span>
               </div>
             </div>
@@ -86,12 +103,13 @@ const UserButton = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <SignOutButton />
+        <DeleteUserButton userId={userId!}/>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-export const Siteheader = () => {
+export const Siteheader = ({ lname, fname, avatar, userId, email }: Props) => {
   return (
     <div className="flex items-center justify-between">
       <Link href="/dashboard">
@@ -99,7 +117,7 @@ export const Siteheader = () => {
       </Link>
       <div className="flex items-center gap-4 py-6">
         <ProductsDropdown />
-        <UserButton />
+        <UserButton email={email} fname={fname} lname={lname} avatar={avatar} userId={userId} />
       </div>
     </div>
   );
