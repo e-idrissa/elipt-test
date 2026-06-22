@@ -31,18 +31,20 @@ import {
 import { DollarSignIcon } from "lucide-react";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 const formSchema = z.object({
   title: z
     .string()
-    .min(4, "Password must be at least 4 characters.")
-    .max(32, "Password must be at most 32 characters."),
+    .min(2, "Title must be at least 2 characters.")
+    .max(32, "Title must be at most 32 characters."),
   description: z
     .string()
-    .min(4, "Password must be at least 4 characters.")
-    .max(200, "Password must be at most 200 characters."),
-  image: z.string().min(4, "Image is required."),
-  price: z.number(),
+    .min(4, "Description must be at least 4 characters.")
+    .max(200, "Description must be at most 200 characters."),
+  image: z.string().min(1, "Image is required."),
+  price: z.number().positive("Price must be greater than 0"),
 });
 
 export const NewProductForm = () => {
@@ -50,9 +52,11 @@ export const NewProductForm = () => {
     "/images/sample-product.jpg",
   );
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       title: "",
       description: "",
@@ -61,36 +65,37 @@ export const NewProductForm = () => {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    });
-  }
-
   const {
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { isValid, isSubmitting },
   } = form;
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await api.post("/products/create", values);
+      toast.success("Product created successfully!");
+      
+      reset();
+      setProductImg("/images/sample-product.jpg");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err instanceof AxiosError
+          ? err.response?.data?.message || "Failed to create product"
+          : "Failed. Try again",
+      );
+    }
+  }
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-
     const localUrl = URL.createObjectURL(file);
     setProductImg(localUrl);
 
@@ -99,19 +104,19 @@ export const NewProductForm = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await api.post("/AppUsers/UploadImage", formData, {
+      const response = await api.post("/products/upload-cover", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const serverImageUrl = response.data.secure_url || response.data.url;
+      const serverImageUrl = response.data.secureUrl || response.data.Url;
+      if (!serverImageUrl) throw new Error("Invalid image URL returned.");
 
       setValue("image", serverImageUrl, { shouldValidate: true });
-
-      toast.success("Image téléversée avec succès !");
+      toast.success("Image uploaded successfully!");
     } catch (error) {
       console.error(error);
-      toast.error("Erreur lors de l'upload de l'image.");
-      setProductImg(productImg);
+      toast.error("Error uploading image.");
+      setProductImg("/images/sample-product.jpg");
     } finally {
       setIsUploading(false);
     }
@@ -119,7 +124,7 @@ export const NewProductForm = () => {
 
   return (
     <form id="new-product-form" onSubmit={handleSubmit(onSubmit)}>
-      <Card className="">
+      <Card>
         <CardHeader className="px-6">
           <CardTitle>Create a new Product</CardTitle>
           <CardDescription>
@@ -128,65 +133,51 @@ export const NewProductForm = () => {
         </CardHeader>
         <CardContent className="px-6">
           <FieldGroup className="flex flex-row items-center gap-6">
+            
+            {/* ZONE UPLOAD D'IMAGE DE-DUPLIQUEE */}
             <Controller
               name="image"
               control={control}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <Field
                   data-invalid={fieldState.invalid}
-                  className="w-[38%] aspect-square relative"
+                  className="w-[38%] aspect-square relative flex flex-col justify-between"
                 >
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="w-[38%] aspect-square relative"
+                  <FieldLabel
+                    htmlFor="product-form-cover"
+                    className="cursor-pointer group relative block size-full rounded-lg overflow-hidden border border-dashed border-muted-foreground/50 hover:border-primary transition"
                   >
-                    <FieldLabel
-                      htmlFor="new-product-form-image"
-                      className="cursor-pointer group relative block size-full rounded-lg overflow-hidden border border-dashed border-muted-foreground/50 hover:border-primary transition"
-                    >
-                      <Image
-                        src={productImg}
-                        loading="eager"
-                        alt="Aperçu du produit"
-                        fill
-                        className={cn(
-                          "object-cover transition-opacity",
-                          isUploading ? "opacity-40" : "group-hover:opacity-80",
-                        )}
-                      />
-                      {isUploading && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Spinner />
-                        </div>
+                    <Image
+                      src={productImg}
+                      loading="eager"
+                      alt="Product preview"
+                      fill
+                      className={cn(
+                        "object-cover transition-opacity",
+                        isUploading ? "opacity-40" : "group-hover:opacity-80",
                       )}
-                    </FieldLabel>
-                    <Input
-                      id="new-product-form-image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      disabled={isUploading || isSubmitting}
-                      className="hidden"
                     />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                    {isUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/20">
+                        <Spinner />
+                      </div>
                     )}
-                  </Field>
-                  <div className="w-10">
-                    <Input
-                      {...field}
-                      id="new-product-form-image"
-                      aria-invalid={fieldState.invalid}
-                      type="file"
-                      className="absolute top-4 left-4 w-10 hidden"
-                    />
-                  </div>
+                  </FieldLabel>
+                  <Input
+                    id="product-form-cover"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={isUploading || isSubmitting}
+                    className="hidden"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
               )}
             />
+
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-4">
                 <Controller
@@ -211,10 +202,11 @@ export const NewProductForm = () => {
                     </Field>
                   )}
                 />
+
                 <Controller
                   name="price"
                   control={control}
-                  render={({ field, fieldState }) => (
+                  render={({ field: { onChange, value, ...fieldRest }, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="w-1/3">
                       <FieldLabel htmlFor="new-product-form-price">
                         Price
@@ -224,12 +216,14 @@ export const NewProductForm = () => {
                           <DollarSignIcon />
                         </InputGroupAddon>
                         <InputGroupInput
-                          {...field}
+                          {...fieldRest}
+                          value={value || ""}
                           id="new-product-form-price"
                           aria-invalid={fieldState.invalid}
-                          placeholder="Sneakers"
+                          placeholder="99"
                           type="number"
                           autoComplete="off"
+                          onChange={(e) => onChange(e.target.valueAsNumber || 0)}
                         />
                       </InputGroup>
                       {fieldState.invalid && (
@@ -239,6 +233,7 @@ export const NewProductForm = () => {
                   )}
                 />
               </div>
+
               <Controller
                 name="description"
                 control={control}
@@ -264,16 +259,17 @@ export const NewProductForm = () => {
                   </Field>
                 )}
               />
+
               <Field orientation="horizontal">
                 <Button
                   type="submit"
                   form="new-product-form"
                   className="w-full"
-                  disabled={isSubmitting || !isValid}
+                  disabled={isSubmitting || isUploading || !isValid}
                 >
                   {isSubmitting ? (
                     <>
-                      <Spinner />
+                      <Spinner className="mr-2" />
                       Creating...
                     </>
                   ) : (

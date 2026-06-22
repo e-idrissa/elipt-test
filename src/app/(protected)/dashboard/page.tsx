@@ -1,60 +1,9 @@
 import { InsightCards } from "@/features/dashboard/insight-cards";
 import { NewProductForm } from "@/features/dashboard/new-product-form";
-import { ProductCard } from "@/features/products/product-card";
+import { ProductsGrid } from "@/features/products/products-grid";
 import { CalendarRangeIcon } from "lucide-react";
 
-const data = [
-  {
-    id: "1",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/shoe.jpg",
-    price: 30,
-  },
-  {
-    id: "2",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
-    price: 30,
-  },
-  {
-    id: "3",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
-    price: 30,
-  },
-  {
-    id: "4",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
-    price: 30,
-  },
-  {
-    id: "5",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
-    price: 30,
-  },
-  {
-    id: "6",
-    title: "Nike Shoes",
-    description:
-      "Sportive Nike shoes made with recents medical and sportive technologies, blend for confort and style",
-    image: "/images/sample-product.jpg",
-    price: 30,
-  },
-];
-
-const DashboardPage = () => {
+const DashboardPage = async () => {
   const date = new Date();
 
   return (
@@ -83,7 +32,8 @@ const DashboardPage = () => {
       </div>
       <div className="space-y-6">
         <h2 className="text-2xl font-medium">All Products</h2>
-        <div className="grid grid-cols-4 gap-8 pb-8">
+        <ProductsGrid category="all"/>
+        {/* <div className="grid grid-cols-4 gap-8 pb-8">
           {data.map((d, idx) => (
             <ProductCard
               key={idx}
@@ -94,7 +44,7 @@ const DashboardPage = () => {
               price={d.price}
             />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

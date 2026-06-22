@@ -14,16 +14,60 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Props {
-  id: string
+  id: string;
 }
 
 export const DeleteProductForm = ({ id }: Props) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const router = useRouter();
+
+  const handleDeleteProduct = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (!id) return;
+
+    setIsDeleting(true);
+
+    try {
+      const token = Cookies.get("auth_token");
+
+      await api.delete(`/products/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast.success("Deleted Successfully.");
+      setIsDeleting(false);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      const errorMessage =
+        err instanceof AxiosError
+          ? err.response?.data?.message || "Error deleting your product."
+          : "Error deleting your product.";
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger className={cn(buttonVariants({ variant: "destructive" }))}>
-        <Trash2Icon />
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialogTrigger
+        className={cn(buttonVariants({ variant: "destructive" }))}
+      >
+        <Trash2Icon className="h-4 w-4" />
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -34,8 +78,20 @@ export const DeleteProductForm = ({ id }: Props) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDeleteProduct}
+            disabled={isDeleting}
+            className={cn(buttonVariants({ variant: "destructive" }))}
+          >
+            {isDeleting ? (
+              <>
+                <Spinner /> Deleting...
+              </>
+            ) : (
+              "Continue"
+            )}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

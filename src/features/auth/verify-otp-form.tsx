@@ -40,8 +40,6 @@ export const VerifyOTPForm = ({
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
 
-  console.log(email);
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const dest = `/config-account?email=${encodeURIComponent(email)}&token=${encodeURIComponent(values.token)}`;
 

@@ -25,7 +25,6 @@ import { ChangeEvent, useState } from "react";
 import Image from "next/image";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
-import { authService } from "@/services/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AxiosError } from "axios";
 
@@ -104,8 +103,6 @@ export const ConfigAccountForm = () => {
       const serverImageUrl = response.data.secureUrl || response.data.Url;
 
       setValue("avatar", serverImageUrl, { shouldValidate: true });
-
-      console.log(response.data);
 
       toast.success("Image téléversée avec succès !");
     } catch (error) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import axios, { AxiosError } from "axios";
 import { cookies } from "next/headers";
+import axios, { AxiosError } from "axios";
 
 const VPS_URL = "https://elipt.elieruvinga.online";
 
@@ -10,6 +10,7 @@ export async function DELETE(
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
+
     const cookieStore = await cookies();
     const token = cookieStore.get("auth_token")?.value;
 
@@ -20,7 +21,7 @@ export async function DELETE(
       );
     }
 
-    const response = await axios.delete(`${VPS_URL}/AppUsers/Delete/${id}`, {
+    const response = await axios.delete(`${VPS_URL}/Product/delete/${id}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -31,15 +32,14 @@ export async function DELETE(
     return NextResponse.json(response.data);
   } catch (error) {
     console.error(
-      "Error Delete Proxy:",
+      "Error DELETE Product Proxy:",
       error instanceof AxiosError ? error.response?.data : "",
     );
     const status = error instanceof AxiosError ? error.response?.status : 500;
     const message =
       error instanceof AxiosError
         ? error.response?.data?.message
-        : "Failed to delete account.";
-
+        : "Failed to delete product.";
     return NextResponse.json({ message }, { status });
   }
 }

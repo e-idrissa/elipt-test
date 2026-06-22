@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductDetails } from "./product-details";
-import { EditProductForm } from "./edit-product-form";
 import { DeleteProductForm } from "./delete-product-form";
 interface Props {
   id: string;
@@ -49,13 +48,6 @@ export const ProductCard = ({
       </CardHeader>
       <CardFooter className="flex items-center gap-2">
         <ProductDetails
-          title={title}
-          description={description}
-          image={image}
-          price={price}
-        />
-        <EditProductForm
-          id={id}
           title={title}
           description={description}
           image={image}
