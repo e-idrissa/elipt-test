@@ -66,7 +66,7 @@ export const VerifyOTPForm = ({
   const {
     handleSubmit,
     control,
-    formState: { isValid, isSubmitting },
+    formState: { isSubmitting },
   } = form;
 
   return (
@@ -117,7 +117,7 @@ export const VerifyOTPForm = ({
                 type="submit"
                 form="verification-form"
                 className="w-full"
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
