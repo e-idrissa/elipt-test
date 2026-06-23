@@ -1,3 +1,4 @@
+import { Hello } from "@/features/dashboard/hello";
 import { InsightCards } from "@/features/dashboard/insight-cards";
 import { NewProductForm } from "@/features/dashboard/new-product-form";
 import { ProductsGrid } from "@/features/products/products-grid";
@@ -18,7 +19,7 @@ const DashboardPage = async () => {
             <p>{date.toDateString()}</p>
           </div>
           <div className="space-y-2">
-            <h1 className="text-5xl font-bold">Welcome back, Eddy</h1>
+            <Hello />
             <p className="text-muted-foreground">
               Good to see you again. Get started by adding another product for
               your customers
@@ -33,18 +34,6 @@ const DashboardPage = async () => {
       <div className="space-y-6">
         <h2 className="text-2xl font-medium">All Products</h2>
         <ProductsGrid category="all"/>
-        {/* <div className="grid grid-cols-4 gap-8 pb-8">
-          {data.map((d, idx) => (
-            <ProductCard
-              key={idx}
-              id={d.id}
-              image={d.image}
-              title={d.title}
-              description={d.description}
-              price={d.price}
-            />
-          ))}
-        </div> */}
       </div>
     </div>
   );

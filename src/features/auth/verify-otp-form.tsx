@@ -15,14 +15,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/axios";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 const formSchema = z.object({
-  token: z.string().min(1, "OTP token is required."),
+  token: z.string().length(6, "Le code OTP doit contenir exactement 6 caractères."),
 });
 
 export const VerifyOTPForm = ({
@@ -34,6 +39,7 @@ export const VerifyOTPForm = ({
     defaultValues: {
       token: "",
     },
+    mode: "onChange",
   });
 
   const router = useRouter();
@@ -44,7 +50,7 @@ export const VerifyOTPForm = ({
     const dest = `/config-account?email=${encodeURIComponent(email)}&token=${encodeURIComponent(values.token)}`;
 
     try {
-      const params = { email, token: values.token }
+      const params = { email, token: values.token };
       
       await api.post("/auth/verify-otp", params);
 
@@ -73,21 +79,30 @@ export const VerifyOTPForm = ({
               Enter the OTP code sent to your email.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <FieldGroup>
+          <CardContent className="flex justify-center">
+            <FieldGroup className="w-full flex items-center justify-center">
               <Controller
                 name="token"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <Input
-                      {...field}
-                      id="verification-form-token"
-                      aria-invalid={fieldState.invalid}
-                      type="text"
-                      placeholder="••••••••"
-                      autoComplete="off"
-                    />
+                  <Field data-invalid={fieldState.invalid} className="w-fit flex flex-col items-center justify-center gap-2">
+                    <InputOTP
+                      maxLength={6}
+                      pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="w-full"
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
@@ -97,12 +112,12 @@ export const VerifyOTPForm = ({
             </FieldGroup>
           </CardContent>
           <CardFooter>
-            <Field orientation="horizontal">
+            <Field orientation="horizontal" className="w-full">
               <Button
                 type="submit"
                 form="verification-form"
                 className="w-full"
-                disabled={isSubmitting || isValid}
+                disabled={isSubmitting || !isValid}
               >
                 {isSubmitting ? (
                   <>

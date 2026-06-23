@@ -104,10 +104,10 @@ export const ConfigAccountForm = () => {
 
       setValue("avatar", serverImageUrl, { shouldValidate: true });
 
-      toast.success("Image téléversée avec succès !");
+      toast.success("Upload completed !");
     } catch (error) {
       console.error(error);
-      toast.error("Erreur lors de l'upload de l'image.");
+      toast.error("Error uploading image");
       setAvatarImg(avatarImg);
     } finally {
       setIsUploading(false);

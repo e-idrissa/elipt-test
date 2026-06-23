@@ -42,7 +42,7 @@ export const ProductCard = ({
             $ {price}
           </div>
         </div>
-        <CardDescription className="line-clamp-2">
+        <CardDescription className="line-clamp-1">
           {description}
         </CardDescription>
       </CardHeader>

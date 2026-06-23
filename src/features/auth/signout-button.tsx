@@ -10,7 +10,7 @@ export const SignOutButton = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const dest = "/sign-in";
+    const dest = "/signin";
     {
       Cookies.remove("auth_token");
 
