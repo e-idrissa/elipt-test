@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Soko
 
-## Getting Started
+Soko is a Next.js e-commerce dashboard for creating and managing products.
+It includes account registration and sign-in, email OTP verification, account
+and avatar management, product creation and cover uploads, and separate views
+for a user's products and products owned by other users.
 
-First, run the development server:
+## Features
+
+- Sign up, sign in, sign out, and OTP verification
+- Account configuration, profile deletion, and avatar uploads
+- Create, view, and delete products
+- Upload product covers
+- Protected dashboard and product pages
+- Separate **Your Products** and **Other People's Products** views
+
+## Tech stack
+
+- Next.js 16 with the App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- React Hook Form and Zod
+- Axios
+- Shadcn-style UI components
+- Sonner notifications
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20 or later
+- npm
+- Access to the Soko API
+
+### Install and run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app redirects the root route to `/dashboard`. Protected routes require an
+`auth_token` cookie created by the sign-in flow.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API configuration
 
-## Learn More
+The server-side API routes proxy requests to:
 
-To learn more about Next.js, take a look at the following resources:
+```text
+https://elipt.elieruvinga.online
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The current route handlers contain this API base URL directly. The
+`BASE_URL=your-base-url` entry in `.env.example` is not currently read by the
+application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Available scripts
 
-## Deploy on Vercel
+```bash
+npm run dev    # Start the development server
+npm run build  # Create a production build
+npm run start  # Start the production server
+npm run lint   # Run ESLint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Public routes:
+
+- `/signin`
+- `/signup`
+- `/verify-otp`
+- `/config-account`
+
+Protected routes:
+
+- `/dashboard`
+- `/products/yours`
+- `/products/others`
